@@ -24,3 +24,53 @@ Topics:
 <your_UserId>.user for the post user data
 Command:
 ./kafka-topics.sh --bootstrap-server BootstrapServerString --command-config client.properties --create --topic <topic_name>
+### Milestone 4: Batch Processing: Connect a MSK cluster to a S3 bucket
+The focus of this milstone is to use a MSK Connect to connect the MSK cluster to a S3 bucket, such that any data going through the cluster will be automaically save and stored in a dedicate S3 bucket.
+#### Sub-tasks
+1. get S3 bucket name
+bucket name: user-0eb84f80c29b-bucket
+ download Confluent.io Amazon S3 Connector and copy it to the S3 bucket
+create directory where we will save our connector 
+mkdir kafka-connect-s3 && cd kafka-connect-s3
+download connector from Confluent
+wget https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-s3/versions/10.0.3/confluentinc-kafka-connect-s3-10.0.3.zip
+2. copy connector to our S3 bucket
+aws s3 cp ./confluentinc-kafka-connect-s3-10.0.3.zip s3://<BUCKET_NAME>/kafka-connect-s3/
+3. Create a custom plugin in the MSK Connect
+This was created via the MSK UI console.
+4. Create a connector with MSK connect
+Now that you have built the plugin-connector pair, data passing through the IAM authenticated cluster, will be automatically stored in the designated S3 bucket.
+### Milestone 5: Batch Processing: configuring an API in API Gateway
+To replicate the Pinterest's experimental data pipeline we will need to build our own API. This API will send data to the MSK cluster, which in turn will be stored in an S3 bucket, using the connector we have build in the previous milestone.
+TASK 1: Build a Kafka REST proxy integration method for the API
+SUBTASKS:
+1. Create a resource that allows you to build a proxy integration for your API.
+2. For the above created resource, create a HTTP ANY method. When setting up the Endpoint URL
+Endpoint URL: http://ec2-52-90-167-165.compute-1.amazonaws.com:8082/{proxy}
+By creating a proxy resource with the {proxy+} parameter and the ANY method, you can provide your integration with access to all available resources.
+3. Deploy the API and make a note of the Invoke URL
+TASK 2: Set up the Kafka REST proxy on the EC2 client 
+SUBTASKS:
+1. First, install the Confluent package for the Kafka REST Proxy on your EC2 client machine. 
+Commands:
+sudo wget https://packages.confluent.io/archive/7.2/confluent-7.2.0.tar.gz
+tar -xvzf confluent-7.2.0.tar.gz 
+To enable the downloaded REST proxy to connect to the MSK cluster. We need to update the confluent-7.2.0/etc/kafka-rest/kafka-rest.properties file, with the corresponding Boostrap server string and Plaintext Apache Zookeeper connection string respectively.
+2. Allow the REST proxy to perform IAM authentication to the MSK cluster by modifying the kafka-rest.properties file. 
+The below needs to be added to the kafka-rest.properties file.
+# Sets up TLS for encryption and SASL for authN.
+client.security.protocol = SASL_SSL
+
+# Identifies the SASL mechanism to use.
+client.sasl.mechanism = AWS_MSK_IAM
+
+# Binds SASL client implementation.
+client.sasl.jaas.config = software.amazon.msk.auth.iam.IAMLoginModule required awsRoleArn="Your Access Role";
+
+# Encapsulates constructing a SigV4 signature based on extracted credentials.
+# The SASL client bound by "sasl.jaas.config" invokes this class.
+client.sasl.client.callback.handler.class = software.amazon.msk.auth.iam.IAMClientCallbackHandler
+3. Start the REST proxy on the EC2 client machine. 
+navigate to the confluent-7.2.0/bin folder, and then run the following command:
+./kafka-rest-start /home/ec2-user/confluent-7.2.0/etc/kafka-rest/kafka-rest.properties
+If everything went well, and your proxy is ready to received requests from the API, you should see a INFO Server started, listening for requests... in your EC2 console.
