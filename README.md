@@ -74,3 +74,23 @@ client.sasl.client.callback.handler.class = software.amazon.msk.auth.iam.IAMClie
 navigate to the confluent-7.2.0/bin folder, and then run the following command:
 ./kafka-rest-start /home/ec2-user/confluent-7.2.0/etc/kafka-rest/kafka-rest.properties
 If everything went well, and your proxy is ready to received requests from the API, you should see a INFO Server started, listening for requests... in your EC2 console.
+TASK 3: Send data to the API
+You are ready to send data to your API, which in turn will send the data to the MSK Cluster using the plugin-connector pair previously created. 
+API Gateway -> Rest proxy -> EC2 cluster -> MSK kafka connector -> S3 bucket
+Ensure that the Request paths has been set within the 'any' Method request.
+### Milestone 6: Batch Processing Databricks
+Task 1: set your own Databricks account
+Task 2: Mount a S3 bucket to Databricks
+In order to clean and query your batch data, you will need to read this data from your S3 bucket into Databricks. To do this, you will need to mount the desired S3 bucket to the Databricks account. 
+
+When reading in the JSONs from S3, make sure to include the complete path to the JSON objects, as seen in your S3 bucket (e.g topics/<your_UserId>.pin/partition=0/). 
+
+You should create three different DataFrames:
+df_pin for the Pinterest post data
+df_geo for the geolocation data
+df_user for the user data.
+
+### Milestone 7: Batch Processing Databricks
+Here we used spark to clean the three datasets and run some queries to draw insights from the dataset.
+For instance, we were able to discover the most popular category to post for each year between 2018 and 2022. 
+

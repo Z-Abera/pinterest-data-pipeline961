@@ -6,6 +6,7 @@ import boto3
 import json
 import sqlalchemy
 from sqlalchemy import text
+import datetime
 
 
 random.seed(100)
@@ -28,6 +29,46 @@ class AWSDBConnector:
 
 new_connector = AWSDBConnector()
 
+def getPayload(data_dict: dict, *args):
+    '''returns payload of correct format for posting to API. This was needed as the geo and user data has values of type datetime.
+    Parameter
+    ----------
+        record_dict: dict
+            Row record obtained from database
+        *args:
+            for Kinesis stream, should be the stream name string
+    '''
+ # iterate over record dictionary and check if any values are of type datetime
+    for key, value in data_dict.items():
+        # if so, convert to string
+        if type(value) == datetime.datetime:
+            data_dict[key] = value.strftime("%Y-%m-%d %H:%M:%S")
+    # create payload from dictionary in format that can be uploaded to API
+    # if optional argument is included, payload is going to Kinesis stream API
+    if len(args) == 1:
+        # create correct header string for request
+        headers = {'Content-Type': 'application/json'}
+        # create correct format of payload
+        payload = json.dumps({
+            "StreamName": args[0],
+            "Data": data_dict,
+            "PartitionKey": args[0][23:]    
+        })
+    # if there are no optional arguments, payload is going to Kafka batch API
+    elif len(args) == 0:
+        # create header string for POST request
+        headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
+        payload = json.dumps({
+            "records": [
+                {
+                    "value": data_dict
+                }
+            ]     
+        })
+    print("print the payload")
+    print(payload)
+    return payload
+
 
 def run_infinite_post_data_loop():
     pin_topic = '0eb84f80c29b.pin'
@@ -43,7 +84,7 @@ def run_infinite_post_data_loop():
             pin_string = text(f"SELECT * FROM pinterest_data LIMIT {random_row}, 1")
             pin_selected_row = connection.execute(pin_string)
             #invoke_url = "https://YourAPIInvokeURL/YourDeploymentStage/topics/YourTopicName"
-            invoke_url1 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-stage/topics/0eb84f80c29b.pin"
+            invoke_url1 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-prod/topics/"+pin_topic
             
             for row in pin_selected_row:
                 pin_result = dict(row._mapping)
@@ -61,23 +102,53 @@ def run_infinite_post_data_loop():
                 #headers = {'Content-Type': 'application/json'}
                 
                 response = requests.request("POST", invoke_url1, headers=headers, data=payload)
+                print(response.status_code)
+                """
+                print(pin_result.keys())
+                print(type(pin_result))
+                print(response.status_code)
+                print(type(pin_result))
                 print("printing status code")
+                print(response.request)
+                print(response.raw)
+                print(response.url)
                 print(response.status_code)
                 print(response.reason)
+                """
 
             geo_string = text(f"SELECT * FROM geolocation_data LIMIT {random_row}, 1")
             geo_selected_row = connection.execute(geo_string)
-            invoke_url2 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-stage/topics/{geo_topic}"
+            invoke_url2 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-prod/topics/"+geo_topic
             
             for row in geo_selected_row:
                 geo_result = dict(row._mapping)
+                print("geo_keys")
+                print(geo_result.keys())
+                #To send JSON messages you need to follow this structure
+                payload = getPayload(geo_result)
+
+                headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
+                #headers = {'Content-Type': 'application/json'}
+                
+                response = requests.request("POST", invoke_url2, headers=headers, data=payload)
+                print(response.status_code)
 
             user_string = text(f"SELECT * FROM user_data LIMIT {random_row}, 1")
             user_selected_row = connection.execute(user_string)
-            invoke_url3 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-stage/topics/{user_topic}"
+            invoke_url3 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-prod/topics/"+user_topic
             
             for row in user_selected_row:
                 user_result = dict(row._mapping)
+                print("user_keys")
+                print(user_result.keys())
+                #To send JSON messages you need to follow this structure
+                payload = getPayload(user_result)
+
+                headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
+                #headers = {'Content-Type': 'application/json'}
+                
+                response = requests.request("POST", invoke_url3, headers=headers, data=payload)
+                print(response.status_code)
             
             #print(pin_result.keys())
 
