@@ -94,3 +94,10 @@ df_user for the user data.
 Here we used spark to clean the three datasets and run some queries to draw insights from the dataset.
 For instance, we were able to discover the most popular category to post for each year between 2018 and 2022. 
 
+### Milestone 8: Batch Processing: AWS MWAA
+Task 1: Create and upload a DAG to a MWAA environment
+Task 2: Trigger a DAG that runs a Databricks Notebook
+Amazon Managed Workflows for Apache Airflow (MWAA) is a managed service that was designed to help you integrate Apache Airflow straight in the cloud, with minimal setup and the quickest time to execution. Apache Airflow is a tool used to schedule and monitor different sequences of processes and tasks, referred to as workflows. In this project MWAA was used to automate the scheduling and running the batch jobs on Databricks. The jobs have been defined to run daily, the configuration details are specified in the file 0eb84f80c29b_dag.py. DAG is a directed acyclic graph (DAG) that manages the running of the batch processing databricks notebook.
+
+### Milestone 9: 
+
