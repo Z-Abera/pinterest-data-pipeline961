@@ -25,50 +25,41 @@ class AWSDBConnector:
     def create_db_connector(self):
         engine = sqlalchemy.create_engine(f"mysql+pymysql://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DATABASE}?charset=utf8mb4")
         return engine
-
-
-new_connector = AWSDBConnector()
-
-def getPayload(data_dict: dict, *args):
-    '''returns payload of correct format for posting to API. This was needed as the geo and user data has values of type datetime.
-    Parameter
-    ----------
+    
+    def getPayload(self, data_dict: dict, *args):
+        '''returns payload of correct format for posting to API. This was needed as the geo and user data has values of type datetime.
+        Parameter
+        ----------
         record_dict: dict
             Row record obtained from database
         *args:
-            for Kinesis stream, should be the stream name string
-    '''
- # iterate over record dictionary and check if any values are of type datetime
-    for key, value in data_dict.items():
-        # if so, convert to string
-        if type(value) == datetime.datetime:
-            data_dict[key] = value.strftime("%Y-%m-%d %H:%M:%S")
-    # create payload from dictionary in format that can be uploaded to API
-    # if optional argument is included, payload is going to Kinesis stream API
-    if len(args) == 1:
-        # create correct header string for request
-        headers = {'Content-Type': 'application/json'}
-        # create correct format of payload
-        payload = json.dumps({
-            "StreamName": args[0],
-            "Data": data_dict,
-            "PartitionKey": args[0][23:]    
-        })
-    # if there are no optional arguments, payload is going to Kafka batch API
-    elif len(args) == 0:
-        # create header string for POST request
-        headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
-        payload = json.dumps({
-            "records": [
-                {
-                    "value": data_dict
-                }
-            ]     
-        })
-    print("print the payload")
-    print(payload)
-    return payload
+            when sending data to Kinesis stream we need to send another parameter - the stream name
+        '''
+        for key, value in data_dict.items():
+            if type(value) == datetime.datetime:
+                data_dict[key] = value.strftime("%Y-%m-%d %H:%M:%S")
+        if len(args) == 1:
+            headers = {'Content-Type': 'application/json'}
+            payload = json.dumps({
+                "StreamName": args[0],
+                "Data": data_dict,
+                "PartitionKey": args[0][23:]    
+            })
+        elif len(args) == 0:
+            headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
+            payload = json.dumps({
+                "records": [
+                    {
+                        "value": data_dict
+                    }
+                ]     
+            })
+        print("print the payload")
+        print(payload)
+        return payload
 
+
+new_connector = AWSDBConnector()
 
 def run_infinite_post_data_loop():
     pin_topic = '0eb84f80c29b.pin'
@@ -125,7 +116,7 @@ def run_infinite_post_data_loop():
                 print("geo_keys")
                 print(geo_result.keys())
                 #To send JSON messages you need to follow this structure
-                payload = getPayload(geo_result)
+                payload = new_connector.getPayload(geo_result)
 
                 headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
                 #headers = {'Content-Type': 'application/json'}
@@ -142,7 +133,7 @@ def run_infinite_post_data_loop():
                 print("user_keys")
                 print(user_result.keys())
                 #To send JSON messages you need to follow this structure
-                payload = getPayload(user_result)
+                payload = new_connector.getPayload(user_result)
 
                 headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
                 #headers = {'Content-Type': 'application/json'}

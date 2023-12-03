@@ -99,5 +99,15 @@ Task 1: Create and upload a DAG to a MWAA environment
 Task 2: Trigger a DAG that runs a Databricks Notebook
 Amazon Managed Workflows for Apache Airflow (MWAA) is a managed service that was designed to help you integrate Apache Airflow straight in the cloud, with minimal setup and the quickest time to execution. Apache Airflow is a tool used to schedule and monitor different sequences of processes and tasks, referred to as workflows. In this project MWAA was used to automate the scheduling and running the batch jobs on Databricks. The jobs have been defined to run daily, the configuration details are specified in the file 0eb84f80c29b_dag.py. DAG is a directed acyclic graph (DAG) that manages the running of the batch processing databricks notebook.
 
-### Milestone 9: 
+### Milestone 9: Stream Processing: AWS Kinesis
+Task 1: Create data streams using Kinesis Data Streams
+Using Kinesis Data Streams create three data streams, one for each Pinterest table. 
+
+Your AWS account has only been granted permissions to create and describe the following streams:
+streaming-0eb84f80c29b-pin
+streaming-0eb84f80c29b-geo
+streaming-0eb84f80c29b-user
+
+
+
 
