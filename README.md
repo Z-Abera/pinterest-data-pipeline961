@@ -1,6 +1,6 @@
 # pinterest-data-pipeline961
 
-## Milestone 3
+## Project 
 Keypair was created to securely connect to EC2 instance. The file (rsa.pem) that contains the private key has been added to the .gitignore file so that it doesn't get accidently exposed.
 Using SSH to connect to the EC2 instance. 
 TO DO: add the commands used.
@@ -58,17 +58,17 @@ tar -xvzf confluent-7.2.0.tar.gz
 To enable the downloaded REST proxy to connect to the MSK cluster. We need to update the confluent-7.2.0/etc/kafka-rest/kafka-rest.properties file, with the corresponding Boostrap server string and Plaintext Apache Zookeeper connection string respectively.
 2. Allow the REST proxy to perform IAM authentication to the MSK cluster by modifying the kafka-rest.properties file. 
 The below needs to be added to the kafka-rest.properties file.
-# Sets up TLS for encryption and SASL for authN.
+Sets up TLS for encryption and SASL for authN.
 client.security.protocol = SASL_SSL
 
-# Identifies the SASL mechanism to use.
+Identifies the SASL mechanism to use.
 client.sasl.mechanism = AWS_MSK_IAM
 
-# Binds SASL client implementation.
+Binds SASL client implementation.
 client.sasl.jaas.config = software.amazon.msk.auth.iam.IAMLoginModule required awsRoleArn="Your Access Role";
 
-# Encapsulates constructing a SigV4 signature based on extracted credentials.
-# The SASL client bound by "sasl.jaas.config" invokes this class.
+Encapsulates constructing a SigV4 signature based on extracted credentials.
+The SASL client bound by "sasl.jaas.config" invokes this class.
 client.sasl.client.callback.handler.class = software.amazon.msk.auth.iam.IAMClientCallbackHandler
 3. Start the REST proxy on the EC2 client machine. 
 navigate to the confluent-7.2.0/bin folder, and then run the following command:
@@ -101,6 +101,7 @@ Amazon Managed Workflows for Apache Airflow (MWAA) is a managed service that was
 
 ### Milestone 9: Stream Processing: AWS Kinesis
 Task 1: Create data streams using Kinesis Data Streams
+AWS Kinesis can collect streaming data such as event logs, social media feeds, application data, and IoT sensor data in real time or near real-time. Kinesis enables you to process and analyze this data as soon as it arrives, allowing you to respond instantly and gain timely analytics insights.
 Using Kinesis Data Streams create three data streams, one for each Pinterest table. 
 
 Your AWS account has only been granted permissions to create and describe the following streams:
@@ -108,6 +109,15 @@ streaming-0eb84f80c29b-pin
 streaming-0eb84f80c29b-geo
 streaming-0eb84f80c29b-user
 
+Task 2: Configure an API with Kinesis proxy integration
 
+The API created will be able to invoke the following actions:
+List streams in Kinesis
+Create, describe and delete streams in Kinesis
+Add records to streams in Kinesis
 
+Task 3: Send data to the Kinesis stream
+In this section we create user_posting_emulation_streaming.py, that builds upon the initial user_posting_emulation.py.
+
+We will send requests to your API, which adds one record at a time to the streams created. Also data from the three Pinterest tables will be sent to the respective Kinesis stream. 
 

@@ -39,6 +39,8 @@ def run_infinite_post_data_loop():
                 
                 response = requests.request("PUT", invoke_url, headers=headers, data=payload)
                 print(response.status_code)
+                print("printing response text")
+                print(response.text)
 
             geo_string = text(f"SELECT * FROM geolocation_data LIMIT {random_row}, 1")
             geo_selected_row = connection.execute(geo_string)
