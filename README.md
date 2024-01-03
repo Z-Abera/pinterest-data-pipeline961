@@ -1,10 +1,16 @@
-# pinterest-data-pipeline961
+# pinterest-data-pipeline
 
-## Project 
+## Project Introduction
+Pinterest crunches billions of data points every day to decide how to provide more value to their users. In this project, we'll create a similar microservice the Pinterest platform uses to ingest and post data to the relevant data repositories to then be used for analysis by machine learning algorithms. 
+
+## Environment and Set-up details
+
 Keypair was created to securely connect to EC2 instance. The file (rsa.pem) that contains the private key has been added to the .gitignore file so that it doesn't get accidently exposed.
 Using SSH to connect to the EC2 instance. 
-TO DO: add the commands used.
-### Task 3: Set up Kafka on the EC2 instance 
+
+Anaconda was used and imports; sqlalchemy and requests were utilised. 
+
+### Set up Kafka on the EC2 instance 
 To connect to a predefined MSK cluster (this set up was done before this project), installing the appropriate packages was required.
 Install the IAM MSK authentication package (wget https://github.com/aws/aws-msk-iam-auth/releases/download/v1.1.5/aws-msk-iam-auth-1.1.5-all.jar) on your client EC2 machine within the Kafka libs folder (kafka_2.12-2.8.1/libs). This package is necessary to connect to MSK clusters that require IAM authentication, like the one you have been granted access to.
 Within the bashrc file we need to update the classpath export CLASSPATH=/home/ec2-user/kafka_2.12-2.8.1/libs/aws-msk-iam-auth-1.1.5-all.jar . The CLASSPATH environment variable is used by Java applications to specify the directories or JAR files that contain the required classes and resources. By adding the path to the aws-msk-iam-auth-1.1.5-all.jar file to the CLASSPATH, the Kafka client will be able to locate and utilize the necessary Amazon MSK IAM libraries when executing commands.
@@ -40,7 +46,8 @@ aws s3 cp ./confluentinc-kafka-connect-s3-10.0.3.zip s3://<BUCKET_NAME>/kafka-co
 This was created via the MSK UI console.
 4. Create a connector with MSK connect
 Now that you have built the plugin-connector pair, data passing through the IAM authenticated cluster, will be automatically stored in the designated S3 bucket.
-### Milestone 5: Batch Processing: configuring an API in API Gateway
+
+### Batch Processing: configuring an API in API Gateway
 To replicate the Pinterest's experimental data pipeline we will need to build our own API. This API will send data to the MSK cluster, which in turn will be stored in an S3 bucket, using the connector we have build in the previous milestone.
 TASK 1: Build a Kafka REST proxy integration method for the API
 SUBTASKS:
@@ -78,7 +85,7 @@ TASK 3: Send data to the API
 You are ready to send data to your API, which in turn will send the data to the MSK Cluster using the plugin-connector pair previously created. 
 API Gateway -> Rest proxy -> EC2 cluster -> MSK kafka connector -> S3 bucket
 Ensure that the Request paths has been set within the 'any' Method request.
-### Milestone 6: Batch Processing Databricks
+## Batch Processing using Apache Spark via Databricks
 Task 1: set your own Databricks account
 Task 2: Mount a S3 bucket to Databricks
 In order to clean and query your batch data, you will need to read this data from your S3 bucket into Databricks. To do this, you will need to mount the desired S3 bucket to the Databricks account. 
@@ -90,16 +97,19 @@ df_pin for the Pinterest post data
 df_geo for the geolocation data
 df_user for the user data.
 
-### Milestone 7: Batch Processing Databricks
 Here we used spark to clean the three datasets and run some queries to draw insights from the dataset.
 For instance, we were able to discover the most popular category to post for each year between 2018 and 2022. 
 
-### Milestone 8: Batch Processing: AWS MWAA
+clean_and_query_data_using_spark.ipynb is the file that contains the code to clean and extract insights from the data using spark.
+
+
+
+## Batch Processing: AWS MWAA
 Task 1: Create and upload a DAG to a MWAA environment
 Task 2: Trigger a DAG that runs a Databricks Notebook
 Amazon Managed Workflows for Apache Airflow (MWAA) is a managed service that was designed to help you integrate Apache Airflow straight in the cloud, with minimal setup and the quickest time to execution. Apache Airflow is a tool used to schedule and monitor different sequences of processes and tasks, referred to as workflows. In this project MWAA was used to automate the scheduling and running the batch jobs on Databricks. The jobs have been defined to run daily, the configuration details are specified in the file 0eb84f80c29b_dag.py. DAG is a directed acyclic graph (DAG) that manages the running of the batch processing databricks notebook.
 
-### Milestone 9: Stream Processing: AWS Kinesis
+## Stream Processing: AWS Kinesis
 Task 1: Create data streams using Kinesis Data Streams
 AWS Kinesis can collect streaming data such as event logs, social media feeds, application data, and IoT sensor data in real time or near real-time. Kinesis enables you to process and analyze this data as soon as it arrives, allowing you to respond instantly and gain timely analytics insights.
 Using Kinesis Data Streams create three data streams, one for each Pinterest table. 
@@ -117,7 +127,8 @@ Create, describe and delete streams in Kinesis
 Add records to streams in Kinesis
 
 Task 3: Send data to the Kinesis stream
-In this section we create user_posting_emulation_streaming.py, that builds upon the initial user_posting_emulation.py.
+In this section we create user_put_emulation_streaming_kinesis.py, that builds upon the initial user_posting_emulation.py.
 
 We will send requests to your API, which adds one record at a time to the streams created. Also data from the three Pinterest tables will be sent to the respective Kinesis stream. 
 
+The Jupyter notebook process_kinesis_streaming_data.ipynb contains all the code necessary for retrieving the streams from Kinesis, transforming (cleaning) the data, and then loading the data into Delta tables on the Databricks cluster. 
