@@ -9,7 +9,7 @@ from sqlalchemy import text
 import datetime
 
 
-random.seed(100)
+random.seed(200)
 
 
 class AWSDBConnector:
@@ -57,6 +57,66 @@ class AWSDBConnector:
         print("print the payload")
         print(payload)
         return payload
+    
+def update_record(method: str, invoke_url: str, record_dict: dict, *args):
+        '''Creates a payload for posting to AWS API, PUT or POST request
+        Parameters
+        ----------
+        method: str
+            'POST' for when posting to Kafka cluster, 'PUT' when posting to Kinesis stream
+        invoke_url: str
+            Invoke URL of API
+        record_dict: dict
+            Row record obtained from database
+        *args:
+            Should be used when posting to Kinesis stream, should be stream name string
+         '''
+        print("starting update record")
+        # iterate over record dictionary and check if any values are of type datetime
+        for key, value in record_dict.items():
+            # if so, convert to string
+            if type(value) == datetime.datetime:
+                record_dict[key] = value.strftime("%Y-%m-%d %H:%M:%S")
+        # create payload from dictionary in format that can be uploaded to API
+        # if optional argument is included, payload is going to Kinesis stream API
+        if len(args) == 1:
+            # create correct header string for request
+            headers = {'Content-Type': 'application/json'}
+            # create correct format of payload
+            payload = json.dumps({
+            "StreamName": args[0],
+            "Data": record_dict,
+            "PartitionKey": args[0][23:]    
+         })
+        # if there are no optional arguments, payload is going to Kafka batch API
+        elif len(args) == 0:
+            # create header string for POST request
+            headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
+            payload = json.dumps({
+                "records": [
+                    {
+                        "value": record_dict
+                    }
+                ]     
+            })
+        # make request to API
+        response = requests.request(method, invoke_url, headers=headers, data=payload)
+        print(response.status_code)
+    
+def run_continously(func):
+        '''
+        Decorator to run function infinitely at random intervals between 0 and 5
+        seconds
+        '''
+        def inner():
+            while True:
+                # pause for a random length of time between 0 and 5 seconds
+                sleep(random.randrange(0, 5))
+                func()
+    
+        return inner
+
+
 
 
 new_connector = AWSDBConnector()

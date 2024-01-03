@@ -29,7 +29,7 @@ def run_infinite_post_data_loop():
             pin_selected_row = connection.execute(pin_string)
             #invoke_url = "https://YourAPIInvokeURL/YourDeploymentStage/topics/YourTopicName"
             #invoke_url1 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-prod/topics/"+pin_topic
-            invoke_url1 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-prod/streams/"+pin_topic+"/record"
+            invoke_url1 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-prod/streams/"+pin_stream+"/record"
             
             for row in pin_selected_row:
                 pin_result = dict(row._mapping)
@@ -39,10 +39,10 @@ def run_infinite_post_data_loop():
                 #headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
                 headers = {'Content-Type': 'application/json'}
                 
-                response = requests.request("POST", invoke_url1, headers=headers, data=payload)
+                response = requests.request("PUT", invoke_url1, headers=headers, data=payload)
                 print(response.status_code)
                 print(response.raw)
-
+            """
             geo_string = text(f"SELECT * FROM geolocation_data LIMIT {random_row}, 1")
             geo_selected_row = connection.execute(geo_string)
             #invoke_url2 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-prod/topics/"+geo_stream
@@ -75,6 +75,7 @@ def run_infinite_post_data_loop():
                 
                 response = requests.request("POST", invoke_url3, headers=headers, data=payload)
                 print(response.status_code)
+                """
 
 
 if __name__ == "__main__":
