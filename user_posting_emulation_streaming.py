@@ -15,6 +15,9 @@ def run_infinite_post_data_loop():
     pin_stream = 'streaming-0eb84f80c29b-pin'
     geo_stream = 'streaming-0eb84f80c29b-geo'
     user_stream = 'streaming-0eb84f80c29b-user'
+    pin_topic = '0eb84f80c29b.pin'
+    geo_topic = '0eb84f80c29b.geo'
+    user_topic = '0eb84f80c29b.user'
     while True:
         sleep(random.randrange(0, 2))
         random_row = random.randint(0, 11000)
@@ -24,51 +27,53 @@ def run_infinite_post_data_loop():
 
             pin_string = text(f"SELECT * FROM pinterest_data LIMIT {random_row}, 1")
             pin_selected_row = connection.execute(pin_string)
-            invoke_url = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-prod/0eb84f80c29b-streams/stream-name/record"
+            #invoke_url = "https://YourAPIInvokeURL/YourDeploymentStage/topics/YourTopicName"
+            #invoke_url1 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-prod/topics/"+pin_topic
+            invoke_url1 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-prod/streams/"+pin_topic+"/record"
             
             for row in pin_selected_row:
                 pin_result = dict(row._mapping)
-                payload = json.dumps({
-                        "StreamName": pin_stream,
-                        #Data should be send as pairs of column_name:value, with different columns separated by commas       
-                        "Data": {"index": pin_result["index"], "unique_id": pin_result["unique_id"], "title": pin_result["title"], "description": pin_result["description"],"poster_name": pin_result["poster_name"],"follower_count": pin_result["follower_count"],"tag_list": pin_result["tag_list"],"is_image_or_video": pin_result["is_image_or_video"],"image_src": pin_result["image_src"],"downloaded": pin_result["downloaded"],"save_location": pin_result["save_location"],"category": pin_result["category"]},
-                        "PartitionKey": pin_stream
-                })
+               #To send JSON messages you need to follow this structure
+                payload = new_connector.getPayload(pin_result,pin_topic)
 
+                #headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
                 headers = {'Content-Type': 'application/json'}
                 
-                response = requests.request("PUT", invoke_url, headers=headers, data=payload)
+                response = requests.request("POST", invoke_url1, headers=headers, data=payload)
                 print(response.status_code)
-                print("printing response text")
-                print(response.text)
+                print(response.raw)
 
             geo_string = text(f"SELECT * FROM geolocation_data LIMIT {random_row}, 1")
             geo_selected_row = connection.execute(geo_string)
+            #invoke_url2 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-prod/topics/"+geo_stream
+            invoke_url2 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-prod/streams/"+geo_topic+"/record"
+            
             
             for row in geo_selected_row:
                 geo_result = dict(row._mapping)
                 print("geo_keys")
                 print(geo_result.keys())
-                payload = new_connector.getPayload(geo_result,geo_stream)
+                payload = new_connector.getPayload(geo_result,geo_topic)
 
                 headers = {'Content-Type': 'application/json'}
                 
-                response = requests.request("PUT", invoke_url, headers=headers, data=payload)
+                response = requests.request("POST", invoke_url2, headers=headers, data=payload)
                 print(response.status_code)
 
             user_string = text(f"SELECT * FROM user_data LIMIT {random_row}, 1")
             user_selected_row = connection.execute(user_string)
+            invoke_url3 = "https://d2ro2kddr2.execute-api.us-east-1.amazonaws.com/0eb84f80c29b-prod/streams/"+user_topic+"/record"
             
             for row in user_selected_row:
                 user_result = dict(row._mapping)
                 print("user_keys")
                 print(user_result.keys())
                 #To send JSON messages you need to follow this structure
-                payload = new_connector.getPayload(user_result,user_stream)
+                payload = new_connector.getPayload(user_result,user_topic)
 
                 headers = {'Content-Type': 'application/json'}
                 
-                response = requests.request("PUT", invoke_url, headers=headers, data=payload)
+                response = requests.request("POST", invoke_url3, headers=headers, data=payload)
                 print(response.status_code)
 
 
