@@ -141,4 +141,4 @@ In this section we create user_put_emulation_streaming_kinesis.py, that builds u
 
 We will send requests to your API, which adds one record at a time to the streams created. Also data from the three Pinterest tables will be sent to the respective Kinesis stream. 
 
-The Jupyter notebook process_kinesis_streaming_data.ipynb contains all the code necessary for retrieving the streams from Kinesis, transforming (cleaning) the data, and then loading the data into Delta tables on the Databricks cluster. 
+The Jupyter notebook clean_write_streaming_data_kinesis.ipynb contains all the code necessary for retrieving the streams from Kinesis, transforming (cleaning) the data, and then loading the data into Delta tables on the Databricks cluster. 
