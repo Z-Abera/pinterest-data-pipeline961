@@ -8,7 +8,7 @@
     - [Batch Processing configuring an API in API Gateway](https://github.com/Z-Abera/pinterest-data-pipeline961/tree/main#batch-processing-configuring-an-api-in-api-gateway)
 - [Batch Processing using Apache Spark via Databricks](https://github.com/Z-Abera/pinterest-data-pipeline961/tree/main#batch-processing-using-apache-spark-via-databricks)
 - [Batch Processing AWS MWAA](https://github.com/Z-Abera/pinterest-data-pipeline961/tree/main#batch-processing-aws-mwaa)
-- [Stream Processing AWS Kinesis](https://github.com/Z-Abera/pinterest-data-pipeline961/tree/main#batch-processing-aws-kinesis)
+- [Stream Processing AWS Kinesis](https://github.com/Z-Abera/pinterest-data-pipeline961/tree/main#stream-processing-aws-kinesis)
 
 ## Project Introduction
 Pinterest crunches billions of data points every day to decide how to provide more value to their users. In this project, we'll create a similar microservice the Pinterest platform uses to ingest and post data to the relevant data repositories to then be used for analysis by machine learning algorithms. 
