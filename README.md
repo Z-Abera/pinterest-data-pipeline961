@@ -1,5 +1,15 @@
 # pinterest-data-pipeline
 
+## Table of contents
+
+- [Project Introduction](https://github.com/Z-Abera/pinterest-data-pipeline961/tree/main#project-introduction)
+- [Environment and Set-up details](https://github.com/Z-Abera/pinterest-data-pipeline961/tree/main#environment-and-set-up-details)
+    - [Set up Kafka on the EC2 instance ](https://github.com/Z-Abera/pinterest-data-pipeline961/tree/main#set-up-kafka-on-the-ec2-instances)
+    - [Batch Processing configuring an API in API Gateway](https://github.com/Z-Abera/pinterest-data-pipeline961/tree/main#batch-processing-configuring-an-api-in-api-gateway)
+- [Batch Processing using Apache Spark via Databricks](https://github.com/Z-Abera/pinterest-data-pipeline961/tree/main#batch-processing-using-apache-spark-via-databricks)
+- [Batch Processing AWS MWAA](https://github.com/Z-Abera/pinterest-data-pipeline961/tree/main#batch-processing-aws-mwaa)
+- [Stream Processing AWS Kinesis](https://github.com/Z-Abera/pinterest-data-pipeline961/tree/main#batch-processing-aws-kinesis)
+
 ## Project Introduction
 Pinterest crunches billions of data points every day to decide how to provide more value to their users. In this project, we'll create a similar microservice the Pinterest platform uses to ingest and post data to the relevant data repositories to then be used for analysis by machine learning algorithms. 
 
@@ -47,7 +57,7 @@ This was created via the MSK UI console.
 4. Create a connector with MSK connect
 Now that you have built the plugin-connector pair, data passing through the IAM authenticated cluster, will be automatically stored in the designated S3 bucket.
 
-### Batch Processing: configuring an API in API Gateway
+### Batch Processing configuring an API in API Gateway
 To replicate the Pinterest's experimental data pipeline we will need to build our own API. This API will send data to the MSK cluster, which in turn will be stored in an S3 bucket, using the connector we have build in the previous milestone.
 TASK 1: Build a Kafka REST proxy integration method for the API
 SUBTASKS:
@@ -104,12 +114,12 @@ clean_and_query_data_using_spark.ipynb is the file that contains the code to cle
 
 
 
-## Batch Processing: AWS MWAA
+## Batch Processing AWS MWAA
 Task 1: Create and upload a DAG to a MWAA environment
 Task 2: Trigger a DAG that runs a Databricks Notebook
 Amazon Managed Workflows for Apache Airflow (MWAA) is a managed service that was designed to help you integrate Apache Airflow straight in the cloud, with minimal setup and the quickest time to execution. Apache Airflow is a tool used to schedule and monitor different sequences of processes and tasks, referred to as workflows. In this project MWAA was used to automate the scheduling and running the batch jobs on Databricks. The jobs have been defined to run daily, the configuration details are specified in the file 0eb84f80c29b_dag.py. DAG is a directed acyclic graph (DAG) that manages the running of the batch processing databricks notebook.
 
-## Stream Processing: AWS Kinesis
+## Stream Processing AWS Kinesis
 Task 1: Create data streams using Kinesis Data Streams
 AWS Kinesis can collect streaming data such as event logs, social media feeds, application data, and IoT sensor data in real time or near real-time. Kinesis enables you to process and analyze this data as soon as it arrives, allowing you to respond instantly and gain timely analytics insights.
 Using Kinesis Data Streams create three data streams, one for each Pinterest table. 
